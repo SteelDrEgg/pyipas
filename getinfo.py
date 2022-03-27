@@ -1,12 +1,12 @@
 import zipfile, plistlib, re, os, stat, subprocess
 
-def analyze_ipa_with_plistlib(ipa_file):
-    plist_path = find_plist_path(ipa_file)
+def analyze_ipa(ipa_file):
+    plist_path = get_plist_path(ipa_file)
     plist_data = ipa_file.read(plist_path)
     plist_root = plistlib.loads(plist_data)
     return plist_root
 
-def find_plist_path(zip_file):
+def get_plist_path(zip_file):
     name_list = zip_file.namelist()
     pt=r'Payload'+os.sep+'[^'+os.sep+']*.app'+os.sep+'Info.plist'
     # pattern = re.compile(r'Payload/[^/]*.app/Info.plist')
@@ -80,7 +80,7 @@ def analyze_exe(exe):
 def getinfo(path):
     wd=os.path.abspath(os.getcwd())
     ipa = zipfile.ZipFile(path)
-    proot = analyze_ipa_with_plistlib(ipa)
+    proot = analyze_ipa(ipa)
     try:
         os.makedirs(wd+'/temp',mode=0o777)
     except Exception:
@@ -89,6 +89,4 @@ def getinfo(path):
     bunInfo=analyze_exe(exe)
     zj=bunInfo[0]
     arc=bunInfo[1]
-    out={}
-
-    # return analyze_ipa_with_plistlib(path)
+    return dict({'crypt':zj,'arc':arc,'bundle-info':proot})
